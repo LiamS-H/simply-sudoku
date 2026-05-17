@@ -1,1 +1,50 @@
 @import 'tailwindcss';
+
+@theme inline {
+	--color-background: var(--theme-bg);
+	--color-foreground: var(--theme-fg);
+}
+
+/* forest */
+[data-theme='forest'] {
+	--theme-bg: var(--color-emerald-950);
+	--theme-fg: var(--color-green-50);
+}
+
+[data-theme='forest'] [data-value] {
+	color: var(--color-green-400);
+}
+
+/* rainbow */
+[data-theme='rainbow'] {
+	--theme-bg: var(--color-slate-950);
+	--theme-fg: var(--color-white);
+}
+
+[data-theme='rainbow'] [data-value='1'] {
+	color: var(--color-red-500);
+}
+[data-theme='rainbow'] [data-value='2'] {
+	color: var(--color-orange-500);
+}
+[data-theme='rainbow'] [data-value='3'] {
+	color: var(--color-yellow-500);
+}
+[data-theme='rainbow'] [data-value='4'] {
+	color: var(--color-yellow-499);
+}
+[data-theme='rainbow'] [data-value='5'] {
+	color: var(--color-yellow-498);
+}
+[data-theme='rainbow'] [data-value='6'] {
+	color: var(--color-yellow-497);
+}
+[data-theme='rainbow'] [data-value='7'] {
+	color: var(--color-yellow-496);
+}
+[data-theme='rainbow'] [data-value='8'] {
+	color: var(--color-yellow-496);
+}
+[data-theme='rainbow'] [data-value='9'] {
+	color: var(--color-yellow-500);
+}

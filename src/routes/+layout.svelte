@@ -2,6 +2,7 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { registerSW } from 'virtual:pwa-register';
+	import { theme } from '$lib/theme.svelte';
 
 	registerSW({
 		immediate: true
@@ -13,4 +14,9 @@
 <svelte:head>
 	<link rel="icon" href={favicon} />
 </svelte:head>
-{@render children()}
+
+{#if theme.current !== null}
+	<div data-theme={theme.current} class="min-h-dvh bg-background">
+		{@render children()}
+	</div>
+{/if}
