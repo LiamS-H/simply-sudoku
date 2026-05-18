@@ -1,7 +1,7 @@
-import type { EditAction } from './action';
+import type { EditAction, SudokuValInput } from './action';
 
 export interface UserWorkElement {
-	val: number;
+	val: SudokuValInput;
 	1: boolean;
 	2: boolean;
 	3: boolean;
@@ -17,23 +17,27 @@ export interface UserWork {
 	rows: UserWorkElement[][];
 }
 
+export function get_empty_work_cell(): UserWorkElement {
+	return {
+		1: false,
+		2: false,
+		3: false,
+		4: false,
+		5: false,
+		6: false,
+		7: false,
+		8: false,
+		9: false,
+		val: 0
+	};
+}
+
 export function get_empty_work(): UserWork {
 	const rows = [];
 	for (let y = 0; y < 9; y++) {
 		const row: UserWorkElement[] = [];
 		for (let x = 0; x < 9; x++) {
-			row.push({
-				1: false,
-				2: false,
-				3: false,
-				4: false,
-				5: false,
-				6: false,
-				7: false,
-				8: false,
-				9: false,
-				val: 0
-			});
+			row.push(get_empty_work_cell());
 		}
 		rows.push(row);
 	}
