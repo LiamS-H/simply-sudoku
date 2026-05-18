@@ -17,7 +17,31 @@ export interface UserWork {
 	rows: UserWorkElement[][];
 }
 
-export type Difficulty = 'easy' | 'medium' | 'hard';
+export function get_empty_work(): UserWork {
+	const rows = [];
+	for (let y = 0; y < 9; y++) {
+		const row: UserWorkElement[] = [];
+		for (let x = 0; x < 9; x++) {
+			row.push({
+				1: false,
+				2: false,
+				3: false,
+				4: false,
+				5: false,
+				6: false,
+				7: false,
+				8: false,
+				9: false,
+				val: 0
+			});
+		}
+		rows.push(row);
+	}
+	return { rows };
+}
+
+export type Difficulty = 'Easy' | 'Medium' | 'Hard';
+export const DIFFICULTIES: Difficulty[] = ['Easy', 'Medium', 'Hard'] as const;
 
 export type Solution = number[][];
 

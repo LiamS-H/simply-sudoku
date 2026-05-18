@@ -5,11 +5,7 @@ const DEFAULT_THEME: Theme = 'forest';
 export const THEMES: Theme[] = ['forest', 'rainbow'] as const;
 
 class ThemeManager {
-	#current: Theme | null = $state(
-		typeof window !== 'undefined'
-			? (localStorage.getItem('app-theme') as Theme) || DEFAULT_THEME
-			: null
-	);
+	#current: Theme = $state((localStorage.getItem('theme') as Theme) || DEFAULT_THEME);
 
 	get current() {
 		return this.#current;
@@ -18,7 +14,7 @@ class ThemeManager {
 	set(newTheme: Theme) {
 		this.#current = newTheme;
 		if (typeof window !== 'undefined') {
-			localStorage.setItem('app-theme', newTheme);
+			localStorage.setItem('theme', newTheme);
 		}
 	}
 }

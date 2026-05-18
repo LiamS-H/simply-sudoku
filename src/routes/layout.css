@@ -3,12 +3,24 @@
 @theme inline {
 	--color-background: var(--theme-bg);
 	--color-foreground: var(--theme-fg);
+
+	--color-primary: var(--theme-primary);
+	--color-primary-foreground: var(--theme-primary-fg);
+
+	--color-destructive: var(--theme-primary);
+	--color-destructive-foreground: var(--theme-primary-fg);
 }
 
 /* forest */
 [data-theme='forest'] {
 	--theme-bg: var(--color-emerald-950);
-	--theme-fg: var(--color-green-50);
+	--theme-fg: var(--color-green-300);
+
+	--theme-primary: var(--color-emerald-500);
+	--theme-primary-fg: var(--color-green-50);
+
+	--theme-destructive: var(--color-emerald-950);
+	--theme-destructive-fg: var(--color-green-50);
 }
 
 [data-theme='forest'] [data-value] {
