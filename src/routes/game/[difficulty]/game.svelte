@@ -33,13 +33,21 @@
 
 			if (player.problem[row][col] !== 0) {
 				view_number = player.problem[row][col] as SudokuValInput;
+				selected = null;
 				return;
 			}
-
-			selected = { row, col };
+			if (player.work.rows[row][col].val) {
+				view_number = player.work.rows[row][col].val as SudokuValInput;
+			}
 
 			if (edit_number) {
 				player.edit(edit_number, row, col, annotate);
+				return;
+			}
+			if (selected?.row === row && selected?.col === col) {
+				selected = null;
+			} else {
+				selected = { row, col };
 			}
 		}}
 		class="grid aspect-square w-full grid-cols-9 grid-rows-9 select-none md:max-w-md"
@@ -65,16 +73,15 @@
 						if (edit_number === n) {
 							edit_number = null;
 							view_number = 0;
-							if (selected) {
-								player.edit(0, selected.row, selected.col, annotate);
-							}
 							return;
 						}
 						if (selected) {
 							player.edit(n, selected.row, selected.col, annotate);
+							view_number = n;
+						} else {
+							edit_number = n;
+							view_number = n;
 						}
-						edit_number = n;
-						view_number = n;
 					}}
 					class="flex h-14 w-14 items-center justify-center"
 				>

@@ -49,7 +49,9 @@ export class SudokuPlayer {
 			cell[val] = !cell[val];
 			this.#board.moves.push({ type: 'a', row, col, val });
 		} else {
-			if (cell.val === val) return;
+			if (cell.val === val) {
+				val = 0;
+			}
 			const prev = cell.val;
 			cell.val = val;
 			this.#board.moves.push({ type: 's', row, col, val, prev });
