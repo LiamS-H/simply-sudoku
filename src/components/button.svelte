@@ -6,7 +6,7 @@
 		onclick,
 		disabled,
 		class: classes
-	}: { children: Snippet; onclick: () => void; disabled?: boolean; class?: string } = $props();
+	}: { children: Snippet; onclick?: () => void; disabled?: boolean; class?: string } = $props();
 </script>
 
 <button

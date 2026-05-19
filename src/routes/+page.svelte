@@ -25,7 +25,7 @@
 </script>
 
 <div class="flex h-full w-full items-center justify-center">
-	<div class="flex flex-col items-center gap-2">
+	<div class="flex h-32 flex-col items-center gap-2">
 		<div class="flex gap-2">
 			<RoundButton disabled={difficulty_index === 0} onclick={() => difficulty_index--}
 				>-</RoundButton
@@ -40,17 +40,18 @@
 				onclick={() => difficulty_index++}>+</RoundButton
 			>
 		</div>
+
 		<Button
 			onclick={() => {
 				games.save(difficulty, null);
-				goto(resolve(`/game/${difficulty}`));
+				goto(resolve(`/game?difficulty=${difficulty}`));
 			}}
 			class="w-full">New Game</Button
 		>
 		{#if games.get(difficulty) !== null}
 			<Button
 				onclick={() => {
-					goto(resolve(`/game/${difficulty}`));
+					goto(resolve(`/game?difficulty=${difficulty}`));
 				}}
 				class="w-full">Continue</Button
 			>

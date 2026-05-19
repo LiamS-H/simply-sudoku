@@ -3,6 +3,8 @@
 	import { SudokuPlayer } from '$lib/game/client.svelte';
 	import Button from '$components/button.svelte';
 	import type { SudokuPosition, SudokuValInput } from '$lib/game/action';
+	import { games } from '$lib/games.svelte';
+	import { onMount } from 'svelte';
 	import Cell from './cell.svelte';
 
 	const { game }: { game: UserBoard } = $props();
@@ -17,6 +19,21 @@
 	let view_number: SudokuValInput = $state(0);
 
 	let annotate = $state(false);
+
+	function save() {
+		games.save(player.difficulty, player.board);
+	}
+
+	onMount(() => {
+		const interval = setInterval(save, 15000);
+		window.addEventListener('blur', save);
+
+		return () => {
+			clearInterval(interval);
+			window.removeEventListener('blur', save);
+			save();
+		};
+	});
 </script>
 
 <div class="flex h-full flex-col items-center justify-center gap-2 p-1">
@@ -50,7 +67,7 @@
 				selected = { row, col };
 			}
 		}}
-		class="grid aspect-square w-full grid-cols-9 grid-rows-9 select-none md:max-w-md"
+		class="grid aspect-square w-full grid-cols-9 grid-rows-9 md:max-w-md"
 	>
 		{#each rows as row (row)}
 			{#each cols as col (col)}

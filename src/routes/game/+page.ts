@@ -3,8 +3,8 @@ import { games } from '$lib/games.svelte';
 import { sudoku_solver } from '$lib/solver/client';
 import { error } from '@sveltejs/kit';
 
-export const load = async ({ params }) => {
-	const difficulty = params.difficulty as Difficulty;
+export const load = async ({ url }) => {
+	const difficulty = (url.searchParams.get('difficulty') as Difficulty) || 'Easy';
 
 	if (!DIFFICULTIES.includes(difficulty)) {
 		error(404, 'Invalid difficulty');

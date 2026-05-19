@@ -14,6 +14,10 @@ export class SudokuPlayer {
 		this.#board = board;
 	}
 
+	get board(): UserBoard {
+		return this.#board;
+	}
+
 	get difficulty(): Difficulty {
 		return this.#board.difficulty;
 	}
