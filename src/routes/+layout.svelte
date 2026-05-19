@@ -24,7 +24,10 @@
 {#if is_ssr}
 	<!-- add the icon svg -->
 {:else}
-	<div data-theme={theme.current} class="h-dvh grid-rows-[auto] bg-background text-foreground">
+	<div
+		data-theme={theme.current}
+		class="h-dvh grid-rows-[auto] bg-background text-foreground select-none"
+	>
 		{@render children()}
 	</div>
 {/if}
