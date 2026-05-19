@@ -48,13 +48,15 @@
 			const row = Math.round((y / h) * 9 - 0.5) as SudokuPosition;
 			const col = Math.round((x / w) * 9 - 0.5) as SudokuPosition;
 
-			if (player.problem[row][col] !== 0) {
-				view_number = player.problem[row][col] as SudokuValInput;
+			const prob_val = player.problem[row][col] as SudokuValInput;
+			if (prob_val !== 0) {
+				view_number = prob_val === view_number ? 0 : prob_val;
 				selected = null;
 				return;
 			}
-			if (player.work.rows[row][col].val) {
-				view_number = player.work.rows[row][col].val as SudokuValInput;
+			const val = player.work.rows[row][col].val as SudokuValInput;
+			if (val) {
+				if (view_number) view_number = player.work.rows[row][col].val;
 			}
 
 			if (edit_number) {
