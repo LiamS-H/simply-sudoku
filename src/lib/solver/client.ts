@@ -35,7 +35,7 @@ class SudokuSolver {
 				return;
 			}
 
-			const { problem, solution } = event.data;
+			const { puzzle: problem, solution } = event.data;
 
 			resolve({ problem, solution });
 		});

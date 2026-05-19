@@ -2,8 +2,8 @@
 
 import type { SudokuPosition, SudokuValInput } from '$lib/game/action';
 import type { Difficulty, Solution } from '$lib/game/board';
-import { generatePuzzle } from './solver';
-import { decode } from './transform';
+import { generatePuzzle } from './generate';
+import { decode } from './utils';
 
 export type SudokuWorkerRequest = {
 	id: string;
@@ -23,7 +23,7 @@ export type SudokuWorkerResponse = {
 	| {
 			type: 'board';
 			solution: Solution;
-			problem: Solution;
+			puzzle: Solution;
 	  }
 	| {
 			type: 'hint';
@@ -46,16 +46,20 @@ self.addEventListener('message', (event: MessageEvent<SudokuWorkerRequest>) => {
 
 	switch (type) {
 		case 'board': {
-			const puzzle = generatePuzzle('Easy');
-			if (!puzzle) {
+			const difficulties = {
+				Easy: 20,
+				Medium: 30,
+				Hard: 50
+			} as const;
+			const problem = generatePuzzle(difficulties[event.data.difficulty]);
+			if (!problem) {
 				postMessage({ id, type: 'error', message: 'failed to find' });
 				return;
 			}
-			const solution = decode(puzzle.solution);
-			const problem = decode(puzzle.problem);
-			problem[0][0] = 0;
+			const solution = decode(problem.solution);
+			const puzzle = decode(problem.puzzle);
 
-			postMessage({ id, type: 'board', problem, solution });
+			postMessage({ id, type: 'board', puzzle, solution });
 			return;
 		}
 		case 'hint': {

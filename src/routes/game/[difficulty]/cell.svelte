@@ -22,13 +22,13 @@
 	const spanClass = $derived.by(() => {
 		const spanClass = 'flex h-full w-full items-center justify-center rounded-full';
 		const val = problemVal || workCell.val;
+		if (selected) {
+			return spanClass + ' bg-accent-foreground text-accent';
+		}
 		if (val !== 0 && val === view_number) {
 			return spanClass + ' bg-primary text-primary-foreground';
 		}
 
-		if (selected) {
-			return spanClass + ' bg-primary text-primary-foreground';
-		}
 		if (problemVal !== 0) {
 			return spanClass + ' bg-secondary text-background';
 		}
