@@ -15,6 +15,11 @@
 	onMount(() => {
 		is_ssr = false;
 	});
+	$effect(() => {
+		if (typeof document !== 'undefined') {
+			document.documentElement.setAttribute('data-theme', theme.current);
+		}
+	});
 </script>
 
 <svelte:head>
@@ -24,10 +29,7 @@
 {#if is_ssr}
 	<!-- add the icon svg -->
 {:else}
-	<div
-		data-theme={theme.current}
-		class="h-dvh grid-rows-[auto] bg-background text-foreground font-sans select-none"
-	>
+	<div class="safe-top safe-bottom safe-x flex h-dvh flex-col bg-background text-foreground font-sans select-none overflow-hidden">
 		{@render children()}
 	</div>
 {/if}

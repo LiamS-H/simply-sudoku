@@ -23,6 +23,34 @@
 	--font-sans: var(--theme-font);
 }
 
+:root {
+	--theme-bg: #002400;
+	--theme-fg: #dcd3e0;
+	--theme-font: 'MedievalSharp', cursive;
+}
+
+html,
+body {
+	background-color: var(--theme-bg);
+	color: var(--theme-fg);
+	margin: 0;
+	padding: 0;
+	overscroll-behavior: none;
+}
+
+.safe-top {
+	padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+	padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-x {
+	padding-left: env(safe-area-inset-left);
+	padding-right: env(safe-area-inset-right);
+}
+
 /* forest */
 [data-theme='forest'] {
 	/* --theme-font: 'Fleur De Leah', cursive; */
