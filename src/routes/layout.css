@@ -1,3 +1,7 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Kablammo&display=swap'); */
+/* @import url('https://fonts.googleapis.com/css2?family=Fleur+De+Leah&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+
 @import 'tailwindcss';
 
 @theme inline {
@@ -15,24 +19,30 @@
 
 	--color-destructive: var(--theme-destructive);
 	--color-destructive-foreground: var(--theme-destructive-fg);
+
+	--font-sans: var(--theme-font);
 }
 
 /* forest */
 [data-theme='forest'] {
-	--theme-bg: var(--color-emerald-950);
-	--theme-fg: var(--color-green-300);
+	/* --theme-font: 'Fleur De Leah', cursive; */
+	/* --theme-font: 'Kablammo', system-ui; */
+	--theme-font: 'MedievalSharp', cursive;
 
-	--theme-primary: var(--color-emerald-500);
-	--theme-primary-fg: var(--color-green-50);
+	--theme-bg: #002400;
+	--theme-fg: #dcd3e0;
 
-	--theme-secondary: var(--color-emerald-800);
-	--theme-secondary-fg: var(--color-emerald-400);
+	--theme-primary: #58641d;
+	--theme-primary-fg: #dbd2e0;
+
+	--theme-secondary: #273b09;
+	--theme-secondary-fg: #7b904b;
 
 	--theme-accent: var(--color-lime-400);
 	--theme-accent-fg: var(--color-lime-800);
 
-	--theme-destructive: var(--color-amber-500);
-	--theme-destructive-fg: var(--color-orange-700);
+	--theme-destructive: #b99dc8;
+	--theme-destructive-fg: #dbd2e0;
 }
 
 [data-theme='forest'] [data-value] {
@@ -41,6 +51,7 @@
 
 /* rainbow */
 [data-theme='rainbow'] {
+	--theme-font: 'Lexend', sans-serif;
 	--theme-bg: var(--color-slate-950);
 	--theme-fg: var(--color-white);
 }
