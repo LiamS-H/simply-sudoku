@@ -20,9 +20,9 @@
 	const workCell = $derived(player.work.rows[row][col]);
 
 	const spanClass = $derived.by(() => {
-		const spanClass = ' flex flex-1 items-center justify-center rounded-full';
+		let spanClass = ' flex flex-1 items-center justify-center rounded-full aspect-square';
 		const val = problemVal || workCell.val;
-		if (selected) {
+		if (selected && val) {
 			return spanClass + ' text-accent';
 		}
 		if (val !== 0 && val === view_number) {
@@ -57,7 +57,9 @@
 			{/if}
 		</div>
 	{:else}
-		<div class="grid grid-cols-3 grid-rows-3 text-[10px] leading-tight text-gray-400 sm:text-xs">
+		<div
+			class="grid h-full w-full grid-cols-3 grid-rows-3 text-[8px] leading-tight text-foreground sm:text-xs"
+		>
 			{#each [1, 2, 3, 4, 5, 6, 7, 8, 9] as n (n)}
 				<div class="flex items-center justify-center">
 					{workCell[n as 1] ? n : ''}
