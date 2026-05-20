@@ -36,7 +36,7 @@
 	});
 </script>
 
-<div class="flex h-full flex-col items-center justify-center gap-2 p-1">
+<div class="flex h-full flex-col items-center justify-center gap-2 p-1 overflow-hidden">
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		onpointerup={(e) => {
@@ -56,7 +56,7 @@
 			}
 			const val = player.work.rows[row][col].val as SudokuValInput;
 			if (val) {
-				if (view_number) view_number = player.work.rows[row][col].val;
+				view_number = val;
 			}
 
 			if (edit_number) {
@@ -69,8 +69,16 @@
 				selected = { row, col };
 			}
 		}}
-		class="grid aspect-square w-full grid-cols-9 grid-rows-9 md:max-w-md"
+		class="relative grid aspect-square w-full grid-cols-9 grid-rows-9 bg-background md:max-w-md"
 	>
+		<div
+			class="pointer-events-none absolute z-0 p-1 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] {selected
+				? 'opacity-100'
+				: 'opacity-0'}"
+			style="width: 11.11%; height: 11.11%; left: {(selected?.col ?? 0) * 11.11}%; top: {(selected?.row ?? 0) * 11.11}%"
+		>
+			<div class="h-full w-full rounded-full bg-accent-foreground"></div>
+		</div>
 		{#each rows as row (row)}
 			{#each cols as col (col)}
 				<Cell

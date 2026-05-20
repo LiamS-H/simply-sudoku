@@ -20,10 +20,10 @@
 	const workCell = $derived(player.work.rows[row][col]);
 
 	const spanClass = $derived.by(() => {
-		const spanClass = 'flex h-full w-full items-center justify-center rounded-full';
+		const spanClass = ' flex flex-1 items-center justify-center rounded-full';
 		const val = problemVal || workCell.val;
 		if (selected) {
-			return spanClass + ' bg-accent-foreground text-accent';
+			return spanClass + ' text-accent';
 		}
 		if (val !== 0 && val === view_number) {
 			return spanClass + ' bg-primary text-primary-foreground';
@@ -33,7 +33,7 @@
 			return spanClass + ' bg-secondary text-background';
 		}
 		if (workCell.val !== 0) {
-			return spanClass + ' text-primary-foreground';
+			return spanClass + ' text-foreground';
 		}
 
 		return null;
@@ -41,7 +41,7 @@
 </script>
 
 <button
-	class="flex items-center justify-center bg-background text-3xl font-semibold transition-colors
+	class="relative z-10 flex items-center justify-center bg-transparent p-1 text-2xl font-semibold transition-colors
 		{col === 0 ? 'border-l border-l-primary/20' : ''}
 		{row === 0 ? 'border-t border-t-primary/20' : ''}
 		{col % 3 === 2 && col !== 8 ? 'border-r-2 border-r-primary/50' : 'border-r border-r-primary/20'}

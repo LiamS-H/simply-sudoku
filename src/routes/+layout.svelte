@@ -26,7 +26,7 @@
 {:else}
 	<div
 		data-theme={theme.current}
-		class="h-dvh grid-rows-[auto] bg-background text-foreground select-none"
+		class="h-dvh grid-rows-[auto] bg-background text-foreground font-sans select-none"
 	>
 		{@render children()}
 	</div>

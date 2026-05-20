@@ -8,7 +8,7 @@
 
 <div class="relative h-full w-full">
 	<a href={resolve('/')}>
-		<Button class="absolute top-5 left-5">back</Button>
+		<Button class="absolute top-5 left-5">⇐</Button>
 	</a>
 
 	{#await data.game.promise}
