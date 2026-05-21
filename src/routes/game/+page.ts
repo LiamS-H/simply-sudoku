@@ -10,10 +10,12 @@ export const load = async ({ url }) => {
 		error(404, 'Invalid difficulty');
 	}
 
+	const existing = games.get(difficulty);
+
 	return {
 		game: {
+			initial: existing || null,
 			promise: (async () => {
-				const existing = games.get(difficulty);
 				if (existing) return existing;
 
 				const board = await sudoku_solver.generate_board(difficulty);

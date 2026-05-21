@@ -29,7 +29,9 @@
 {#if is_ssr}
 	<!-- add the icon svg -->
 {:else}
-	<div class="safe-top safe-bottom safe-x flex h-dvh flex-col bg-background text-foreground font-sans select-none overflow-hidden">
+	<div
+		class="safe-top safe-bottom safe-x flex h-dvh flex-col overflow-hidden bg-background font-sans text-foreground select-none"
+	>
 		{@render children()}
 	</div>
 {/if}
