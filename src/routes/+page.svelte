@@ -21,6 +21,10 @@
 	}
 	let difficulty_index = $state(get_difficulty());
 
+	$effect(() => {
+		localStorage.setItem('difficulty', difficulty_index.toString());
+	});
+
 	const difficulty = $derived(DIFFICULTIES[difficulty_index]);
 </script>
 
