@@ -59,7 +59,7 @@
 				view_number = val;
 			}
 
-			if (edit_number) {
+			if (edit_number !== null) {
 				player.edit(edit_number, row, col, annotate);
 				return;
 			}
