@@ -11,7 +11,7 @@
 				<div class="flex aspect-square items-center justify-center p-1">
 					<div
 						class="pulse-wave-dot h-3 w-3 rounded-full bg-primary"
-						style="animation-delay: -{dist * 0.15}s"
+						style="animation-delay: {dist * 0.2}s"
 					></div>
 				</div>
 			{/each}
@@ -47,17 +47,21 @@
 
 <style>
 	@keyframes pulse-wave {
-		0%,
-		100% {
+		0% {
 			transform: scale(0);
-			opacity: 0.2;
+			opacity: 0;
 		}
-		50% {
+		40% {
 			transform: scale(1.15);
 			opacity: 0.9;
 		}
+		70%,
+		100% {
+			transform: scale(0);
+			opacity: 0;
+		}
 	}
 	.pulse-wave-dot {
-		animation: pulse-wave 1.6s ease-in-out infinite;
+		animation: pulse-wave 2s ease-in-out infinite both;
 	}
 </style>
