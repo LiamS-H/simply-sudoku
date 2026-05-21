@@ -20,12 +20,16 @@
 		return num;
 	}
 	let difficulty_index = $state(get_difficulty());
+	let confirming = $state(false);
 
 	$effect(() => {
 		localStorage.setItem('difficulty', difficulty_index.toString());
+		confirming = false;
 	});
 
 	const difficulty = $derived(DIFFICULTIES[difficulty_index]);
+
+	const has_saved = $derived(games.get(difficulty) !== null);
 </script>
 
 <div class="flex h-full w-full items-center justify-center">
@@ -45,20 +49,52 @@
 			>
 		</div>
 
-		<Button
-			onclick={() => {
-				games.save(difficulty, null);
-				goto(resolve(`/game?difficulty=${difficulty}`));
-			}}
-			class="w-full">New Game</Button
-		>
-		{#if games.get(difficulty) !== null}
+		{#if confirming}
 			<Button
+				intent="secondary"
 				onclick={() => {
+					confirming = false;
+				}}
+				class="w-full"
+			>
+				Cancel
+			</Button>
+			<Button
+				intent="destructive"
+				onclick={() => {
+					games.save(difficulty, null);
 					goto(resolve(`/game?difficulty=${difficulty}`));
 				}}
-				class="w-full">Continue</Button
+				class="w-full"
 			>
+				I want a new puzzle.
+			</Button>
+		{:else}
+			<Button
+				intent="primary"
+				onclick={() => {
+					if (has_saved) {
+						confirming = true;
+					} else {
+						games.save(difficulty, null);
+						goto(resolve(`/game?difficulty=${difficulty}`));
+					}
+				}}
+				class="w-full"
+			>
+				New Game
+			</Button>
+			{#if has_saved}
+				<Button
+					intent="primary"
+					onclick={() => {
+						goto(resolve(`/game?difficulty=${difficulty}`));
+					}}
+					class="w-full"
+				>
+					Continue
+				</Button>
+			{/if}
 		{/if}
 	</div>
 </div>

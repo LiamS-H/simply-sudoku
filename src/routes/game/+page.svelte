@@ -22,7 +22,7 @@
 
 <div class="relative h-full w-full">
 	<a href={resolve('/')}>
-		<Button class="absolute top-2 left-2 z-20">⇐</Button>
+		<Button intent="destructive" class="absolute top-2 left-2 z-20">⇐</Button>
 	</a>
 
 	{#if !resolvedGame}

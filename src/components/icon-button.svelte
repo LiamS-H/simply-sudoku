@@ -10,7 +10,7 @@
 
 <button
 	{disabled}
-	class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
+	class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:pointer-events-none disabled:opacity-20"
 	{onclick}
 >
 	{@render children()}

@@ -123,24 +123,26 @@
 		</div>
 
 		<div class="flex gap-4 pt-4">
-			<button
+			<Button
+				intent="destructive"
 				onclick={() => {
 					player.clear();
 					selected = null;
 				}}
-				class="rounded-full border-2 bg-destructive px-3 text-destructive-foreground disabled:opacity-50"
 				disabled={player.work.rows.every((row) => row.every((cell) => cell.val === 0))}
 			>
 				Clear
-			</button>
-			<button
+			</Button>
+			<Button
 				onclick={() => (annotate = !annotate)}
-				class={`h-9 rounded-full border border-primary px-3 ${annotate ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}`}
+				class={`border border-primary px-3 ${annotate ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}`}
 			>
 				Mark
-			</button>
+			</Button>
 
-			<Button onclick={() => player.undo()} disabled={player.moves.length === 0}>Undo</Button>
+			<Button intent="primary" onclick={() => player.undo()} disabled={player.moves.length === 0}
+				>Undo</Button
+			>
 		</div>
 	</div>
 </div>

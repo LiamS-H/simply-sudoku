@@ -33,19 +33,14 @@
 		</div>
 
 		<div class="flex gap-4 pt-4">
-			<button
-				class="rounded-full border-2 bg-destructive px-3 text-destructive-foreground opacity-50"
-				disabled
-			>
-				Clear
-			</button>
+			<Button intent="destructive" disabled>Clear</Button>
 			<button
 				class="h-9 rounded-full border border-primary bg-background px-3 text-foreground opacity-50"
 				disabled
 			>
 				Mark
 			</button>
-			<Button disabled>Undo</Button>
+			<Button intent="primary" disabled>Undo</Button>
 		</div>
 	</div>
 </div>
