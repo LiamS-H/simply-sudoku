@@ -3,6 +3,7 @@
 import type { SudokuPosition, SudokuValInput } from '$lib/game/action';
 import type { Difficulty, Solution } from '$lib/game/board';
 import { BitBoard } from './bitboard';
+import { EasyDifficulty, HardDifficulty, MediumDifficulty, PuzzleGenerator } from './generator';
 import { decode } from './utils';
 
 export type SudokuWorkerRequest = {
@@ -46,36 +47,22 @@ self.addEventListener('message', (event: MessageEvent<SudokuWorkerRequest>) => {
 
 	switch (type) {
 		case 'board': {
-			if (event.data.difficulty === 'Hard') {
-				const s = BitBoard.random();
-				const p = BitBoard.from(s);
-
-				p.mutateDigDepthOne(500);
-				const solution = decode(s.cells);
-				const puzzle = decode(p.cells);
-
-				postMessage({ id, type: 'board', puzzle, solution });
-				return;
-			}
-
 			const difficulties = {
-				Easy: [45, 50],
-				Medium: [50, 55]
-			} as const;
-			// const problem = generatePuzzle(difficulties[event.data.difficulty]);
-			// if (!problem) {
-			// 	postMessage({ id, type: 'error', message: 'failed to find' });
-			// 	return;
-			// }
+				Easy: EasyDifficulty,
+				Medium: MediumDifficulty,
+				Hard: HardDifficulty
+			};
 
-			const s = BitBoard.random();
-			const p = BitBoard.from(s);
-			const [low, high] = difficulties[event.data.difficulty];
-			p.mutateGreedyDigWhileUnique(low, high);
-			const solution = decode(s.cells);
-			const puzzle = decode(p.cells);
+			const solution = BitBoard.random();
+			const generator = new PuzzleGenerator(solution);
+			const puzzle = generator.generate(difficulties[event.data.difficulty]);
 
-			postMessage({ id, type: 'board', puzzle, solution });
+			postMessage({
+				id,
+				type: 'board',
+				puzzle: decode(puzzle.cells),
+				solution: decode(solution.cells)
+			});
 			return;
 		}
 		case 'hint': {

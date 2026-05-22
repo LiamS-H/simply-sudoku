@@ -1,11 +1,16 @@
 /** maps a grid index to its given row */
-const CELL_ROW = Uint8Array.from({ length: 81 }, (_, i) => (i / 9) | 0);
-/** maps a grid index to its given col */
-const CELL_COL = Uint8Array.from({ length: 81 }, (_, i) => i % 9);
-/** maps a grid index to its given cell box */
-const CELL_BOX = Uint8Array.from({ length: 81 }, (_, i) => (((i / 27) | 0) * 3 + (i % 9) / 3) | 0);
+export const CELL_ROW = Uint8Array.from({ length: 81 }, (_, i) => (i / 9) | 0);
 
-/** maps a  */
+/** maps a grid index to its given col */
+export const CELL_COL = Uint8Array.from({ length: 81 }, (_, i) => i % 9);
+
+/** maps a grid index to its given cell box */
+export const CELL_BOX = Uint8Array.from(
+	{ length: 81 },
+	(_, i) => (((i / 27) | 0) * 3 + (i % 9) / 3) | 0
+);
+
+/** maps a bitmask back to its concrete digit value */
 export const BIT_DIGIT = new Uint8Array(512);
 for (let d = 1; d <= 9; d++) BIT_DIGIT[1 << (d - 1)] = d;
 
@@ -38,7 +43,6 @@ export const PEERS: Uint8Array[] = Array.from({ length: 81 }, (_, i) => {
 	}
 
 	set.delete(i);
-
 	return Uint8Array.from([...set]);
 });
 
@@ -48,11 +52,11 @@ export function popcount9(n: number): number {
 	n = (n & 0x33) + ((n >> 2) & 0x33);
 	return (n + (n >> 4)) & 0x0f;
 }
+
 /** shuffle an array in place */
-function shuffle(buf: Uint8Array, len: number = buf.length) {
+export function shuffle(buf: Uint8Array, len: number = buf.length) {
 	for (let i = len - 1; i > 0; i--) {
 		const j = (Math.random() * (i + 1)) | 0;
-
 		const t = buf[i];
 		buf[i] = buf[j];
 		buf[j] = t;
@@ -60,21 +64,21 @@ function shuffle(buf: Uint8Array, len: number = buf.length) {
 }
 
 export class BitBoard {
-	cells = new Uint8Array(81);
+	public cells = new Uint8Array(81);
 
-	// views for currently placed digits
-	protected rowV = new Uint16Array(9);
-	protected colV = new Uint16Array(9);
-	protected boxV = new Uint16Array(9);
+	// Views exposed to allow deep copying and state evaluations
+	public rowV = new Uint16Array(9);
+	public colV = new Uint16Array(9);
+	public boxV = new Uint16Array(9);
 
 	private seedDigits = Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
 	static from(old: BitBoard) {
 		const board = new BitBoard();
-		board.cells = new Uint8Array(old.cells);
-		board.rowV = new Uint16Array(old.rowV);
-		board.colV = new Uint16Array(old.colV);
-		board.boxV = new Uint16Array(old.boxV);
+		board.cells.set(old.cells);
+		board.rowV.set(old.rowV);
+		board.colV.set(old.colV);
+		board.boxV.set(old.boxV);
 		return board;
 	}
 
@@ -96,20 +100,16 @@ export class BitBoard {
 		board.mutateSolveDFS();
 		return board;
 	}
-	/** Solves a board using brute force, return True when Solved False when failed */
+
 	protected mutateSolveDFS(): boolean {
 		const cell_index = this.most_constrained_empty_cell();
-
 		if (cell_index === null) return true;
-
 		if (cell_index === -1) return false;
 
 		const m = this.available(cell_index);
-
 		if (m === 0) return false;
 
 		const digits = new Uint8Array(9);
-
 		let n = 0;
 		for (let bits = m; bits; bits &= bits - 1) {
 			digits[n++] = BIT_DIGIT[bits & -bits];
@@ -119,56 +119,62 @@ export class BitBoard {
 
 		for (let i = 0; i < n; i++) {
 			this.place(cell_index, digits[i]);
-
 			if (this.mutateSolveDFS()) return true;
-
 			this.remove(cell_index, digits[i]);
 		}
 		return false;
 	}
-	/** Solves a board using brute force, returns the number of solutions found
-	 * @param {number} exit_solutions - Number of solutions to exit when found
-	 * @param {number} count - Number reference to keep track of the solutions found
-	 */
-	protected solveDFS(exit_solutions: number, count: number = 0): number {
+
+	solveDFS(exit_solutions: number): number {
 		const cell_index = this.most_constrained_empty_cell();
-
-		if (cell_index === null) {
-			return 1;
-		}
-
-		if (cell_index === -1) {
-			return 0;
-		}
+		if (cell_index === null) return 1;
+		if (cell_index === -1) return 0;
 
 		const m = this.available(cell_index);
-
-		const digits = new Uint8Array(9);
-
-		let n = 0;
-		for (let bits = m; bits; bits &= bits - 1) {
-			digits[n++] = BIT_DIGIT[bits & -bits];
-		}
-
-		shuffle(digits, n);
-
 		let solutions = 0;
 
-		for (let i = 0; i < n; i++) {
-			this.place(cell_index, digits[i]);
-
+		for (let bits = m; bits; bits &= bits - 1) {
+			const bit = bits & -bits;
+			const digit = BIT_DIGIT[bit];
+			this.place(cell_index, digit);
 			solutions += this.solveDFS(exit_solutions);
+			this.remove(cell_index, digit);
 
-			this.remove(cell_index, digits[i]);
-
-			if (solutions >= exit_solutions) return count;
+			if (solutions >= exit_solutions) return solutions;
 		}
 		return solutions;
 	}
 
-	mutateDigRandom(amount: number) {
-		const indexes: Uint8Array = Uint8Array.from({ length: 81 }, (_, i) => i);
+	/**
+	 * Verifies if the board remains unique after removing a known digit.
+	 * Assumes the digit has ALREADY been removed from the cell at `idx`.
+	 */
+	public isUniqueAfterRemoval(idx: number, originalVal: number): boolean {
+		const m = this.available(idx);
 
+		for (let bits = m; bits; bits &= bits - 1) {
+			const bit = bits & -bits;
+			const digit = BIT_DIGIT[bit];
+
+			if (digit === originalVal) continue;
+
+			this.place(idx, digit);
+
+			const hasAlternativeSolution = this.solveDFS(1) > 0;
+
+			this.remove(idx, digit);
+
+			if (hasAlternativeSolution) {
+				return false;
+			}
+		}
+
+		// No alternative choices could solve the board; uniqueness is guaranteed!
+		return true;
+	}
+
+	public mutateDigRandom(amount: number) {
+		const indexes: Uint8Array = Uint8Array.from({ length: 81 }, (_, i) => i);
 		shuffle(indexes);
 
 		for (let i = 0; i < amount; i++) {
@@ -176,7 +182,7 @@ export class BitBoard {
 		}
 	}
 
-	mutateGreedyDigWhileUnique(min: number, max: number, count = 0): boolean {
+	public mutateGreedyDigWhileUnique(min: number, max: number, count = 0): boolean {
 		if (count >= max) return true;
 
 		const constraint_counts = this.all_basic_constraints();
@@ -185,66 +191,51 @@ export class BitBoard {
 		indices.sort((a, b) => constraint_counts[a] - constraint_counts[b]);
 
 		for (const index of indices) {
-			// Fix: Check the actual sorted index, not the loop counter
 			if (constraint_counts[index] === -1) continue;
 
 			const val = this.cells[index];
 			this.remove(index, val);
 
-			// Scenario A: Digging this cell broke uniqueness
 			if (!this.isUnique()) {
-				this.place(index, val); // Fix: Always restore the cell on failure
-
-				// If we've already hit our minimum target, we can stop digging entirely
+				this.place(index, val);
 				if (count >= min) return true;
-				continue; // Otherwise, try a different cell at this depth
+				continue;
 			}
 
-			// Scenario B: Uniqueness preserved, dive deeper
 			if (this.mutateGreedyDigWhileUnique(min, max, count + 1)) {
 				return true;
 			}
 
-			// Scenario C: The deeper path failed, backtrack and try next index
 			this.place(index, val);
 		}
-
 		return false;
 	}
 
-	/**  verify uniqueness */
-	isUnique(): boolean {
+	public isUnique(): boolean {
 		const solutions = this.solveDFS(2);
 		return solutions === 1;
 	}
 
-	/** returns a mask of square availability */
-	protected available(i: number): number {
+	public available(i: number): number {
 		return ~(this.rowV[CELL_ROW[i]] | this.colV[CELL_COL[i]] | this.boxV[CELL_BOX[i]]) & 0x1ff;
 	}
 
-	protected place(i: number, digit: number) {
+	public place(i: number, digit: number) {
 		const bit = 1 << (digit - 1);
-
 		this.cells[i] = digit;
-
 		this.rowV[CELL_ROW[i]] |= bit;
 		this.colV[CELL_COL[i]] |= bit;
 		this.boxV[CELL_BOX[i]] |= bit;
 	}
 
-	protected remove(i: number, digit: number) {
+	public remove(i: number, digit: number) {
 		const bit = ~(1 << (digit - 1));
-
 		this.cells[i] = 0;
-
 		this.rowV[CELL_ROW[i]] &= bit;
 		this.colV[CELL_COL[i]] &= bit;
 		this.boxV[CELL_BOX[i]] &= bit;
 	}
 
-	/** Returns cell with minimum available values,
-	 *  returns -1 when fully constrained and null when complete */
 	protected most_constrained_empty_cell(): number | null {
 		let best = -1;
 		let bestCount = 10;
@@ -255,15 +246,12 @@ export class BitBoard {
 			empty = false;
 
 			const count = popcount9(this.available(i));
-
 			if (count < bestCount) {
 				best = i;
 				bestCount = count;
-
 				if (count === 1) break;
 			}
 		}
-
 		return empty ? null : best;
 	}
 
@@ -274,8 +262,6 @@ export class BitBoard {
 		});
 	}
 
-	/** Returns cell with minimum available values,
-	 *  returns -1 when fully constrained and null when complete */
 	protected most_constrained_full_cell(): number {
 		let best = -1;
 		let bestCount = 10;
@@ -284,114 +270,12 @@ export class BitBoard {
 			if (this.cells[i] === 0) continue;
 
 			const count = popcount9(this.available(i));
-
 			if (count < bestCount) {
 				best = i;
 				bestCount = count;
-
 				if (count === 1) break;
 			}
 		}
-
 		return best;
 	}
-
-	/**
-	 * Solves the board using only depth-one steps (naked singles).
-	 * Restores the board to its original state using place/remove history.
-	 * Returns true if the board is successfully solved, false otherwise.
-	 */
-	solveDepthOne(): boolean {
-		const history: { idx: number; val: number }[] = [];
-		let solved = false;
-
-		while (true) {
-			let found = false;
-			let emptyCount = 0;
-			for (let i = 0; i < 81; i++) {
-				if (this.cells[i] === 0) {
-					emptyCount++;
-					const avail = this.available(i);
-					if (popcount9(avail) === 1) {
-						const digit = BIT_DIGIT[avail & -avail];
-						this.place(i, digit);
-						history.push({ idx: i, val: digit });
-						found = true;
-						break;
-					}
-				}
-			}
-			if (emptyCount === 0) {
-				solved = true;
-				break;
-			}
-			if (!found) {
-				break;
-			}
-		}
-
-		// Restore the original board state
-		for (let i = history.length - 1; i >= 0; i--) {
-			const entry = history[i];
-			this.remove(entry.idx, entry.val);
-		}
-
-		return solved;
-	}
-
-	/**
-	 * Performs a backtracking search directly on this board to dig out clues.
-	 * Returns the best (most dug out/smallest clue count) board found that is still depth-one solvable.
-	 */
-	protected digDepthOne(allowedSteps: number): BitBoard {
-		let bestBoard = BitBoard.from(this);
-		let bestClues = 81;
-		for (let i = 0; i < 81; i++) {
-			if (this.cells[i] === 0) bestClues--;
-		}
-
-		let stepsCount = 0;
-
-		const search = (clues: number) => {
-			if (stepsCount >= allowedSteps) return;
-
-			if (clues < bestClues) {
-				bestBoard = BitBoard.from(this);
-				bestClues = clues;
-			}
-
-			const indices = Uint8Array.from({ length: 81 }, (_, i) => i);
-			shuffle(indices);
-
-			for (const idx of indices) {
-				if (stepsCount >= allowedSteps) return;
-				if (this.cells[idx] === 0) continue;
-
-				const val = this.cells[idx];
-				this.remove(idx, val);
-				stepsCount++;
-
-				if (this.solveDepthOne()) {
-					search(clues - 1);
-				}
-
-				this.place(idx, val);
-			}
-		};
-
-		search(bestClues);
-		return bestBoard;
-	}
-
-	/**
-	 * Mutates this board to the best dug out board found within the allowed number of search steps.
-	 */
-	mutateDigDepthOne(allowedSteps: number): void {
-		const bestBoard = this.digDepthOne(allowedSteps);
-		this.cells.set(bestBoard.cells);
-		this.rowV.set(bestBoard.rowV);
-		this.colV.set(bestBoard.colV);
-		this.boxV.set(bestBoard.boxV);
-	}
 }
-
