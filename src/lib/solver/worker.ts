@@ -46,10 +46,21 @@ self.addEventListener('message', (event: MessageEvent<SudokuWorkerRequest>) => {
 
 	switch (type) {
 		case 'board': {
+			if (event.data.difficulty === 'Hard') {
+				const s = BitBoard.random();
+				const p = BitBoard.from(s);
+
+				p.mutateDigDepthOne(500);
+				const solution = decode(s.cells);
+				const puzzle = decode(p.cells);
+
+				postMessage({ id, type: 'board', puzzle, solution });
+				return;
+			}
+
 			const difficulties = {
-				Easy: [10, 45],
-				Medium: [45, 55],
-				Hard: [55, 70]
+				Easy: [45, 50],
+				Medium: [50, 55]
 			} as const;
 			// const problem = generatePuzzle(difficulties[event.data.difficulty]);
 			// if (!problem) {

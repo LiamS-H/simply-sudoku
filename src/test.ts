@@ -34,3 +34,38 @@ for (let i = 0; i < PUZZLE_ITERS; i++) {
 	}
 }
 console.log(`${((Date.now() - timer) / PUZZLE_ITERS).toFixed(3)} ms/board`);
+
+console.log('\n--- Testing depth-one solver and digging ---');
+const DEPTH_ONE_ITERS = 5;
+for (let i = 0; i < DEPTH_ONE_ITERS; i++) {
+	console.log(`\nTest Case ${i + 1}:`);
+	const solution = BitBoard.random();
+	const puzzle = BitBoard.from(solution);
+
+	const allowedSteps = 500;
+	const digTimer = Date.now();
+	puzzle.mutateDigDepthOne(allowedSteps);
+	const timeTaken = Date.now() - digTimer;
+
+	let clueCount = 0;
+	for (let j = 0; j < 81; j++) {
+		if (puzzle.cells[j] !== 0) clueCount++;
+	}
+
+	console.log(`Dug puzzle in ${timeTaken} ms (allowedSteps = ${allowedSteps}). Clue count: ${clueCount}`);
+	console.log('Puzzle:');
+	printPuzzle(puzzle.cells);
+
+	// Verify that it can be solved by solveDepthOne
+	if (!puzzle.solveDepthOne()) {
+		throw Error('Depth-one solver failed to solve the dug puzzle!');
+	}
+
+	// Verify uniqueness
+	if (!puzzle.isUnique()) {
+		throw Error('Dug puzzle is not unique!');
+	}
+
+	console.log('Passed validation: unique and solvable by depth-one!');
+}
+

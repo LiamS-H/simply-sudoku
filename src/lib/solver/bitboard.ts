@@ -295,4 +295,103 @@ export class BitBoard {
 
 		return best;
 	}
+
+	/**
+	 * Solves the board using only depth-one steps (naked singles).
+	 * Restores the board to its original state using place/remove history.
+	 * Returns true if the board is successfully solved, false otherwise.
+	 */
+	solveDepthOne(): boolean {
+		const history: { idx: number; val: number }[] = [];
+		let solved = false;
+
+		while (true) {
+			let found = false;
+			let emptyCount = 0;
+			for (let i = 0; i < 81; i++) {
+				if (this.cells[i] === 0) {
+					emptyCount++;
+					const avail = this.available(i);
+					if (popcount9(avail) === 1) {
+						const digit = BIT_DIGIT[avail & -avail];
+						this.place(i, digit);
+						history.push({ idx: i, val: digit });
+						found = true;
+						break;
+					}
+				}
+			}
+			if (emptyCount === 0) {
+				solved = true;
+				break;
+			}
+			if (!found) {
+				break;
+			}
+		}
+
+		// Restore the original board state
+		for (let i = history.length - 1; i >= 0; i--) {
+			const entry = history[i];
+			this.remove(entry.idx, entry.val);
+		}
+
+		return solved;
+	}
+
+	/**
+	 * Performs a backtracking search directly on this board to dig out clues.
+	 * Returns the best (most dug out/smallest clue count) board found that is still depth-one solvable.
+	 */
+	protected digDepthOne(allowedSteps: number): BitBoard {
+		let bestBoard = BitBoard.from(this);
+		let bestClues = 81;
+		for (let i = 0; i < 81; i++) {
+			if (this.cells[i] === 0) bestClues--;
+		}
+
+		let stepsCount = 0;
+
+		const search = (clues: number) => {
+			if (stepsCount >= allowedSteps) return;
+
+			if (clues < bestClues) {
+				bestBoard = BitBoard.from(this);
+				bestClues = clues;
+			}
+
+			const indices = Uint8Array.from({ length: 81 }, (_, i) => i);
+			shuffle(indices);
+
+			for (const idx of indices) {
+				if (stepsCount >= allowedSteps) return;
+				if (this.cells[idx] === 0) continue;
+
+				const val = this.cells[idx];
+				this.remove(idx, val);
+				stepsCount++;
+
+				if (this.solveDepthOne()) {
+					search(clues - 1);
+				}
+
+				this.place(idx, val);
+			}
+		};
+
+		search(bestClues);
+		return bestBoard;
+	}
+
+	/**
+	 * Mutates this board to the best dug out board found within the allowed number of search steps.
+	 */
+	mutateDigDepthOne(allowedSteps: number): void {
+		const bestBoard = this.digDepthOne(allowedSteps);
+		this.cells.set(bestBoard.cells);
+		this.rowV.set(bestBoard.rowV);
+		this.colV.set(bestBoard.colV);
+		this.boxV.set(bestBoard.boxV);
+	}
 }
+
