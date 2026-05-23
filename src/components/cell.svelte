@@ -7,13 +7,19 @@
 		col,
 		player,
 		view_number,
-		selected
+		selected,
+		error,
+		fade,
+		grow
 	}: {
 		row: SudokuPosition;
 		col: SudokuPosition;
 		player: SudokuPlayer;
 		view_number: SudokuValInput;
 		selected: boolean;
+		error: boolean;
+		fade: { delay: number; key: number };
+		grow: { delay: number; key: number };
 	} = $props();
 
 	const problemVal = $derived(player.problem[row][col]);
@@ -22,6 +28,12 @@
 	const spanClass = $derived.by(() => {
 		let spanClass = ' flex flex-1 items-center justify-center rounded-full aspect-square';
 		const val = problemVal || workCell.val;
+		if (error && selected) {
+			return spanClass + ' text-destructive';
+		}
+		if (error) {
+			return spanClass + ' text-destructive-foreground bg-destructive';
+		}
 		if (selected && val) {
 			return spanClass + ' text-accent';
 		}
@@ -47,18 +59,31 @@
 		{col % 3 === 2 && col !== 8 ? 'border-r-2 border-r-primary/50' : 'border-r border-r-primary/20'}
 		{row % 3 === 2 && row !== 8 ? 'border-b-2 border-b-primary/50' : 'border-b border-b-primary/20'}"
 >
+	{#key fade.key}
+		{#if fade.key > 0}
+			<div
+				class="animate-bg-fade-primary pointer-events-none absolute inset-0 z-0"
+				style="animation-delay: {fade.delay}ms"
+			></div>
+		{/if}
+	{/key}
 	{#if spanClass !== null}
 		{@const val = problemVal || workCell.val}
-		<div class={spanClass}>
+		<div class="{spanClass} relative z-10">
 			{#if val !== 0}
-				<span>
-					{val}
-				</span>
+				{#key grow.key}
+					<span
+						class="inline-block {grow.key > 0 ? 'animate-grow-spin' : ''}"
+						style="animation-delay: {grow.delay}ms"
+					>
+						{val}
+					</span>
+				{/key}
 			{/if}
 		</div>
 	{:else}
 		<div
-			class="grid h-full w-full grid-cols-3 grid-rows-3 text-[8px] leading-tight text-foreground sm:text-xs"
+			class="relative z-10 grid h-full w-full grid-cols-3 grid-rows-3 text-[8px] leading-tight text-foreground sm:text-xs"
 		>
 			{#each [1, 2, 3, 4, 5, 6, 7, 8, 9] as n (n)}
 				<div class="flex items-center justify-center">

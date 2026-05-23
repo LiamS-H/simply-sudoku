@@ -2,7 +2,7 @@
 	import { resolve } from '$app/paths';
 	import Button from '$components/button.svelte';
 	import type { UserBoard } from '$lib/game/board.js';
-	import Game from './game.svelte';
+	import Game from '$components/game.svelte';
 	import { fade } from 'svelte/transition';
 	import Loading from './loading.svelte';
 

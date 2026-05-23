@@ -5,7 +5,9 @@
 	import type { SudokuPosition, SudokuValInput } from '$lib/game/action';
 	import { games } from '$lib/games.svelte';
 	import { onMount } from 'svelte';
-	import Cell from './cell.svelte';
+	import Cell from '$components/cell.svelte';
+	import { encode, findCompleted, findErrors } from '$lib/solver/utils';
+	import { invalidateAll } from '$app/navigation';
 
 	const { game }: { game: UserBoard } = $props();
 
@@ -34,8 +36,139 @@
 			save();
 		};
 	});
+
+	const errors = $derived.by(() => {
+		const work = encode(player.work.rows.map((row) => row.map((cell) => cell.val)));
+		const problem = encode(player.problem);
+		return findErrors(work, problem) ?? [];
+	});
+
+	// the correct box for a given row column can be found with (r/3|0)*3+(c/3|0)
+	const [rowsC, colsC, boxesC, counts, complete] = $derived.by(() => {
+		const board = encode(
+			player.work.rows.map((row, r) => row.map((cell, c) => player.problem[r][c] || cell.val))
+		);
+		return findCompleted(board);
+	});
+
+	let lastSelected = $state<{ row: SudokuPosition; col: SudokuPosition }>({ row: 0, col: 0 });
+	let fadeAnimations = $state(Array.from({ length: 81 }, () => ({ delay: 0, key: 0 })));
+	let growAnimations = $state(Array.from({ length: 81 }, () => ({ delay: 0, key: 0 })));
+
+	let prev: {
+		rows: Uint8Array;
+		cols: Uint8Array;
+		boxes: Uint8Array;
+		counts: Uint8Array;
+		complete: boolean;
+	} | null = null;
+
+	$effect(() => {
+		const rC = rowsC;
+		const cC = colsC;
+		const bC = boxesC;
+		const cnt = counts;
+		const comp = complete;
+		if (complete) {
+			selected = null;
+			edit_number = null;
+			view_number = 0;
+		}
+
+		if (prev === null) {
+			prev = {
+				rows: rC.slice(),
+				cols: cC.slice(),
+				boxes: bC.slice(),
+				counts: cnt.slice(),
+				complete: comp
+			};
+			return;
+		}
+
+		const triggerFade = (r: number, c: number, delay: number) => {
+			const idx = r * 9 + c;
+			fadeAnimations[idx].delay = delay;
+			fadeAnimations[idx].key++;
+		};
+
+		const triggerGrow = (r: number, c: number, delay: number) => {
+			const idx = r * 9 + c;
+			growAnimations[idx].delay = delay;
+			growAnimations[idx].key++;
+		};
+
+		if (comp && !prev.complete) {
+			for (let r = 0; r < 9; r++) {
+				for (let c = 0; c < 9; c++) {
+					const delay = (r + c) * 50;
+					triggerFade(r, c, delay);
+					triggerGrow(r, c, delay);
+				}
+			}
+		} else {
+			for (let i = 0; i < 9; i++) {
+				if (rC[i] && !prev.rows[i]) {
+					for (let c = 0; c < 9; c++) {
+						const delay = Math.abs(c - lastSelected.col) * 50;
+						triggerFade(i, c, delay);
+					}
+				}
+			}
+			for (let i = 0; i < 9; i++) {
+				if (cC[i] && !prev.cols[i]) {
+					for (let r = 0; r < 9; r++) {
+						const delay = Math.abs(r - lastSelected.row) * 50;
+						triggerFade(r, i, delay);
+					}
+				}
+			}
+			for (let i = 0; i < 9; i++) {
+				if (bC[i] && !prev.boxes[i]) {
+					const br = Math.floor(i / 3) * 3;
+					const bc = (i % 3) * 3;
+					for (let r = br; r < br + 3; r++) {
+						for (let c = bc; c < bc + 3; c++) {
+							const delay = (Math.abs(r - lastSelected.row) + Math.abs(c - lastSelected.col)) * 50;
+							triggerFade(r, c, delay);
+						}
+					}
+				}
+			}
+			for (let i = 0; i < 9; i++) {
+				if (cnt[i] >= 9 && prev.counts[i] < 9) {
+					const val = i + 1;
+					for (let r = 0; r < 9; r++) {
+						for (let c = 0; c < 9; c++) {
+							if (player.problem[r][c] === val || player.work.rows[r][c].val === val) {
+								triggerGrow(r, c, 0);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		prev = {
+			rows: rC.slice(),
+			cols: cC.slice(),
+			boxes: bC.slice(),
+			counts: cnt.slice(),
+			complete: comp
+		};
+	});
 </script>
 
+<!-- {#if complete || true}
+	<Button
+		intent="destructive"
+		class="absolute top-2 right-2 z-20"
+		onclick={async () => {
+			games.save(game.difficulty, null);
+			await invalidateAll();
+		}}>New Game</Button
+	>
+{/if} -->
 <div class="flex h-full flex-col items-center justify-center gap-2 overflow-hidden p-1">
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
@@ -52,6 +185,7 @@
 			if (prob_val !== 0) {
 				view_number = prob_val === view_number ? 0 : prob_val;
 				selected = null;
+				lastSelected = { row, col };
 				return;
 			}
 			const val = player.work.rows[row][col].val as SudokuValInput;
@@ -61,12 +195,14 @@
 
 			if (edit_number !== null) {
 				player.edit(edit_number, row, col, annotate);
+				lastSelected = { row, col };
 				return;
 			}
 			if (selected?.row === row && selected?.col === col) {
 				selected = null;
 			} else {
 				selected = { row, col };
+				lastSelected = { row, col };
 			}
 		}}
 		class="relative grid aspect-square w-full grid-cols-9 grid-rows-9 bg-background md:max-w-md"
@@ -83,11 +219,14 @@
 		{#each rows as row (row)}
 			{#each cols as col (col)}
 				<Cell
+					error={errors.includes(`${row}${col}`)}
 					{row}
 					{col}
 					{player}
 					{view_number}
 					selected={selected?.row === row && selected?.col === col}
+					fade={fadeAnimations[row * 9 + col]}
+					grow={growAnimations[row * 9 + col]}
 				/>
 			{/each}
 		{/each}
@@ -112,6 +251,7 @@
 						}
 					}}
 					class="flex h-14 w-14 items-center justify-center"
+					class:opacity-25={counts[n - 1] >= 9}
 				>
 					<span
 						class={`flex h-12 w-12 items-center justify-center rounded-full border border-secondary text-3xl ${edit_number === n ? 'bg-secondary text-secondary-foreground' : 'text-secondary'}`}

@@ -1,4 +1,5 @@
-import { BitBoard, BOXES, popcount9, shuffle } from './bitboard';
+import { BitBoard } from './bitboard';
+import { BOXES, popcount9, shuffle } from './utils';
 
 export type TechniqueType =
 	| 'SimpleGridScan'
