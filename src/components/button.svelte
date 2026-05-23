@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { onDestroy, type Snippet } from 'svelte';
 
 	const {
 		children,
@@ -14,6 +14,10 @@
 		class?: string;
 		intent?: 'primary' | 'secondary' | 'destructive' | 'accent';
 	} = $props();
+	import { createWebHaptics } from 'web-haptics/svelte';
+	import { defaultPatterns } from 'web-haptics';
+	const { trigger, destroy } = createWebHaptics();
+	onDestroy(destroy);
 
 	const styles = $derived(
 		intent
@@ -34,7 +38,10 @@
 	{disabled}
 	class={'flex h-9 items-center justify-center rounded-full disabled:pointer-events-none disabled:opacity-50 ' +
 		styles}
-	{onclick}
+	onclick={() => {
+		onclick?.();
+		trigger(defaultPatterns.selection);
+	}}
 >
 	{@render children()}
 </button>

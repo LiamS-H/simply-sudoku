@@ -7,7 +7,12 @@
 	import { onMount } from 'svelte';
 	import Cell from '$components/cell.svelte';
 	import { encode, findCompleted, findErrors } from '$lib/solver/utils';
-	import { invalidateAll } from '$app/navigation';
+	import { onDestroy } from 'svelte';
+	import { createWebHaptics } from 'web-haptics/svelte';
+	import { defaultPatterns } from 'web-haptics';
+	const { trigger, destroy } = createWebHaptics();
+	onDestroy(destroy);
+	// import { invalidateAll } from '$app/navigation';
 
 	const { game }: { game: UserBoard } = $props();
 
@@ -97,8 +102,8 @@
 			growAnimations[idx].delay = delay;
 			growAnimations[idx].key++;
 		};
-
 		if (comp && !prev.complete) {
+			trigger(defaultPatterns.buzz);
 			for (let r = 0; r < 9; r++) {
 				for (let c = 0; c < 9; c++) {
 					const delay = (r + c) * 50;
@@ -106,47 +111,87 @@
 					triggerGrow(r, c, delay);
 				}
 			}
-		} else {
-			for (let i = 0; i < 9; i++) {
-				if (rC[i] && !prev.rows[i]) {
+			prev = {
+				rows: rC.slice(),
+				cols: cC.slice(),
+				boxes: bC.slice(),
+				counts: cnt.slice(),
+				complete: comp
+			};
+			return;
+		}
+		let fading = false;
+		let growing = false;
+		for (let i = 0; i < 9; i++) {
+			if (rC[i] && !prev.rows[i]) {
+				for (let c = 0; c < 9; c++) {
+					const delay = Math.abs(c - lastSelected.col) * 50;
+					triggerFade(i, c, delay);
+					fading = true;
+				}
+			}
+		}
+		for (let i = 0; i < 9; i++) {
+			if (cC[i] && !prev.cols[i]) {
+				for (let r = 0; r < 9; r++) {
+					const delay = Math.abs(r - lastSelected.row) * 50;
+					triggerFade(r, i, delay);
+					fading = true;
+				}
+			}
+		}
+		for (let i = 0; i < 9; i++) {
+			if (bC[i] && !prev.boxes[i]) {
+				const br = Math.floor(i / 3) * 3;
+				const bc = (i % 3) * 3;
+				for (let r = br; r < br + 3; r++) {
+					for (let c = bc; c < bc + 3; c++) {
+						const delay = (Math.abs(r - lastSelected.row) + Math.abs(c - lastSelected.col)) * 50;
+						triggerFade(r, c, delay);
+						fading = true;
+					}
+				}
+			}
+		}
+		for (let i = 0; i < 9; i++) {
+			if (cnt[i] >= 9 && prev.counts[i] < 9) {
+				const val = i + 1;
+				for (let r = 0; r < 9; r++) {
 					for (let c = 0; c < 9; c++) {
-						const delay = Math.abs(c - lastSelected.col) * 50;
-						triggerFade(i, c, delay);
-					}
-				}
-			}
-			for (let i = 0; i < 9; i++) {
-				if (cC[i] && !prev.cols[i]) {
-					for (let r = 0; r < 9; r++) {
-						const delay = Math.abs(r - lastSelected.row) * 50;
-						triggerFade(r, i, delay);
-					}
-				}
-			}
-			for (let i = 0; i < 9; i++) {
-				if (bC[i] && !prev.boxes[i]) {
-					const br = Math.floor(i / 3) * 3;
-					const bc = (i % 3) * 3;
-					for (let r = br; r < br + 3; r++) {
-						for (let c = bc; c < bc + 3; c++) {
-							const delay = (Math.abs(r - lastSelected.row) + Math.abs(c - lastSelected.col)) * 50;
-							triggerFade(r, c, delay);
+						if (player.problem[r][c] === val || player.work.rows[r][c].val === val) {
+							triggerGrow(r, c, 0);
+							growing = true;
 						}
 					}
 				}
 			}
-			for (let i = 0; i < 9; i++) {
-				if (cnt[i] >= 9 && prev.counts[i] < 9) {
-					const val = i + 1;
-					for (let r = 0; r < 9; r++) {
-						for (let c = 0; c < 9; c++) {
-							if (player.problem[r][c] === val || player.work.rows[r][c].val === val) {
-								triggerGrow(r, c, 0);
-							}
-						}
-					}
-				}
-			}
+		}
+
+		if (growing && fading) {
+			trigger([
+				{ duration: 30, intensity: 1 },
+				{ delay: 20, duration: 200, intensity: 1 },
+				{ delay: 20, duration: 40, intensity: 1 },
+				{ delay: 20, duration: 30, intensity: 1 },
+				{ delay: 40, duration: 40 },
+				{ delay: 10, duration: 140, intensity: 0.7 },
+				{ delay: 30, duration: 30 }
+			]);
+		} else if (growing) {
+			trigger([
+				{ duration: 200, intensity: 1 },
+				{ delay: 10, duration: 10 }
+			]);
+		} else if (fading) {
+			trigger([
+				{ duration: 30, intensity: 1 },
+				{ delay: 20, duration: 30, intensity: 1 },
+				{ delay: 20, duration: 40, intensity: 1 },
+				{ delay: 10, duration: 30, intensity: 1 },
+				{ delay: 20, duration: 40, intensity: 1 },
+				{ delay: 20, duration: 130 },
+				{ delay: 20, duration: 50 }
+			]);
 		}
 
 		prev = {
@@ -188,6 +233,7 @@
 				lastSelected = { row, col };
 				return;
 			}
+			trigger(defaultPatterns.light);
 			const val = player.work.rows[row][col].val as SudokuValInput;
 			if (val) {
 				view_number = val;
@@ -237,6 +283,7 @@
 			{#each [1, 2, 3, 4, 5, 6, 7, 8, 9, 0] as const as n (n)}
 				<button
 					onpointerdown={() => {
+						trigger(defaultPatterns.selection);
 						if (edit_number === n) {
 							edit_number = null;
 							view_number = 0;
