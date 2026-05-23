@@ -35,6 +35,7 @@ body {
 	color: var(--theme-fg);
 	margin: 0;
 	padding: 0;
+	touch-action: none;
 	overscroll-behavior: none;
 }
 
