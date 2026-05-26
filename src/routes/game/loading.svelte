@@ -35,7 +35,7 @@
 		<div class="flex gap-4 pt-4">
 			<Button intent="destructive" disabled>Clear</Button>
 			<button
-				class="h-9 rounded-full border border-primary bg-background px-3 text-foreground opacity-50"
+				class="h-9 rounded-full border border-primary bg-background px-3 text-primary opacity-50"
 				disabled
 			>
 				Mark

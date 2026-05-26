@@ -2,7 +2,15 @@ export type Theme = (typeof THEMES)[number];
 
 const DEFAULT_THEME: Theme = 'forest';
 
-export const THEMES = ['forest', 'rainbow', 'midnight', 'autumn'] as const;
+export const THEMES = [
+	'forest',
+	'rainbow',
+	// 'midnight',
+	// 'autumn',
+	'spring'
+	// 'winter',
+	// 'summer'
+] as const;
 
 class ThemeManager {
 	#current: Theme = $state((localStorage.getItem('theme') as Theme) || DEFAULT_THEME);

@@ -331,7 +331,7 @@
 			</Button>
 			<Button
 				onclick={() => (annotate = !annotate)}
-				class={`border border-primary px-3 ${annotate ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}`}
+				class={`border border-primary px-3 ${annotate ? 'bg-primary text-primary-foreground' : 'bg-background text-primary'}`}
 			>
 				Mark
 			</Button>

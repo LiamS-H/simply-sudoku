@@ -87,7 +87,7 @@
 			class="relative z-10 grid h-full w-full grid-cols-3 grid-rows-3 text-[10px] leading-tight text-foreground"
 		>
 			{#if view_number !== 0 && workCell[view_number]}
-				<div class="absolute inset-1/4 -z-10 flex h-1/2 w-1/2" data-hint="true" data-value={view_number}></div>
+				<div class="absolute -z-10 flex" data-hint="true" data-value={view_number}></div>
 			{/if}
 			{#each [1, 2, 3, 4, 5, 6, 7, 8, 9] as n (n)}
 				<div class="flex items-center justify-center" data-value={n}>
