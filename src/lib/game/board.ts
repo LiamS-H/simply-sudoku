@@ -55,5 +55,5 @@ export interface UserBoard {
 	problem: Solution; // 0s are empty
 
 	work: UserWork;
-	moves: EditAction[];
+	moves: EditAction[][];
 }
