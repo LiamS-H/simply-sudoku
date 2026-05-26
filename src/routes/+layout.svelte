@@ -4,6 +4,7 @@
 	import { registerSW } from 'virtual:pwa-register';
 	import { theme } from '$lib/theme.svelte';
 	import { onMount } from 'svelte';
+	import ThemePicker from '$components/theme-picker.svelte';
 
 	registerSW({
 		immediate: true
@@ -32,6 +33,7 @@
 	<div
 		class="safe-top safe-bottom safe-x flex h-dvh flex-col overflow-hidden bg-background font-sans text-foreground select-none"
 	>
+		<ThemePicker />
 		{@render children()}
 	</div>
 {/if}
