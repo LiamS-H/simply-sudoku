@@ -40,6 +40,9 @@
 		if (val !== 0 && val === view_number) {
 			return spanClass + ' bg-primary text-primary-foreground';
 		}
+		// if (view_number !== 0 && workCell[view_number]) {
+		// 	return spanClass + ' bg-primary/90 text-primary-foreground';
+		// }
 
 		if (problemVal !== 0) {
 			return spanClass + ' bg-secondary text-background';
@@ -83,8 +86,11 @@
 		</div>
 	{:else}
 		<div
-			class="relative z-10 grid h-full w-full grid-cols-3 grid-rows-3 text-[10px] leading-tight text-foreground sm:text-xs"
+			class="relative z-10 grid h-full w-full grid-cols-3 grid-rows-3 text-[10px] leading-tight text-foreground"
 		>
+			{#if view_number !== 0 && workCell[view_number]}
+				<div class="absolute inset-1/4 -z-10 flex h-1/2 w-1/2 rotate-45 bg-primary"></div>
+			{/if}
 			{#each [1, 2, 3, 4, 5, 6, 7, 8, 9] as n (n)}
 				<div class="flex items-center justify-center">
 					{workCell[n as 1] ? n : ''}
