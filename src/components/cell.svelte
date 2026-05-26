@@ -10,7 +10,11 @@
 		selected,
 		error,
 		fade,
-		grow
+		grow,
+		row_complete = false,
+		col_complete = false,
+		box_complete = false,
+		val_complete = false
 	}: {
 		row: SudokuPosition;
 		col: SudokuPosition;
@@ -20,37 +24,23 @@
 		error: boolean;
 		fade: { delay: number; key: number };
 		grow: { delay: number; key: number };
+		row_complete?: boolean;
+		col_complete?: boolean;
+		box_complete?: boolean;
+		val_complete?: boolean;
 	} = $props();
 
 	const problemVal = $derived(player.problem[row][col]);
 	const workCell = $derived(player.work.rows[row][col]);
 
-	const spanClass = $derived.by(() => {
-		let spanClass = ' flex flex-1 items-center justify-center rounded-full aspect-square';
-		const val = problemVal || workCell.val;
-		if (error && selected) {
-			return spanClass + ' text-destructive';
-		}
-		if (error) {
-			return spanClass + ' text-destructive-foreground bg-destructive';
-		}
-		if (selected && val) {
-			return spanClass + ' text-accent';
-		}
-		if (val !== 0 && val === view_number) {
-			return spanClass + ' bg-primary text-primary-foreground';
-		}
-		// if (view_number !== 0 && workCell[view_number]) {
-		// 	return spanClass + ' bg-primary/90 text-primary-foreground';
-		// }
-
-		if (problemVal !== 0) {
-			return spanClass + ' bg-secondary text-background';
-		}
-		if (workCell.val !== 0) {
-			return spanClass + ' text-foreground';
-		}
-
+	const val = $derived(problemVal || workCell.val);
+	const state = $derived.by(() => {
+		if (error && selected) return 'error-selected';
+		if (error) return 'error';
+		if (selected && val) return 'selected';
+		if (val !== 0 && val === view_number) return 'match';
+		if (problemVal !== 0) return 'fixed';
+		if (workCell.val !== 0) return 'work';
 		return null;
 	});
 </script>
@@ -61,22 +51,30 @@
 		{row === 0 ? 'border-t border-t-primary/20' : ''}
 		{col % 3 === 2 && col !== 8 ? 'border-r-2 border-r-primary/50' : 'border-r border-r-primary/20'}
 		{row % 3 === 2 && row !== 8 ? 'border-b-2 border-b-primary/50' : 'border-b border-b-primary/20'}"
+	data-row-complete={row_complete}
+	data-col-complete={col_complete}
+	data-box-complete={box_complete}
 >
 	{#key fade.key}
 		{#if fade.key > 0}
 			<div
-				class="animate-bg-fade-primary pointer-events-none absolute inset-0 z-0"
+				class="victory-fade pointer-events-none absolute inset-0 z-0"
 				style="animation-delay: {fade.delay}ms"
 			></div>
 		{/if}
 	{/key}
-	{#if spanClass !== null}
-		{@const val = problemVal || workCell.val}
-		<div class="{spanClass} relative z-10 m-1">
+	{#if state !== null}
+		<div
+			class="relative z-10 m-1 flex aspect-square flex-1 items-center justify-center rounded-full"
+			data-state={state}
+			data-value={val}
+			data-val-complete={val_complete}
+		>
 			{#if val !== 0}
 				{#key grow.key}
 					<span
-						class="inline-block {grow.key > 0 ? 'animate-grow-spin' : ''}"
+						class="inline-block"
+						class:victory-grow={grow.key > 0}
 						style="animation-delay: {grow.delay}ms"
 					>
 						{val}
@@ -89,10 +87,10 @@
 			class="relative z-10 grid h-full w-full grid-cols-3 grid-rows-3 text-[10px] leading-tight text-foreground"
 		>
 			{#if view_number !== 0 && workCell[view_number]}
-				<div class="absolute inset-1/4 -z-10 flex h-1/2 w-1/2 rotate-45 bg-primary"></div>
+				<div class="absolute inset-1/4 -z-10 flex h-1/2 w-1/2" data-hint="true" data-value={view_number}></div>
 			{/if}
 			{#each [1, 2, 3, 4, 5, 6, 7, 8, 9] as n (n)}
-				<div class="flex items-center justify-center">
+				<div class="flex items-center justify-center" data-value={n}>
 					{workCell[n as 1] ? n : ''}
 				</div>
 			{/each}

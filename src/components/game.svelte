@@ -6,7 +6,7 @@
 	import { games } from '$lib/games.svelte';
 	import { onMount } from 'svelte';
 	import Cell from '$components/cell.svelte';
-	import { encode, findCompleted, findErrors } from '$lib/solver/utils';
+	import { encode, findCompleted, findErrors, CELL_BOX } from '$lib/solver/utils';
 	import { onDestroy } from 'svelte';
 	import { createWebHaptics } from 'web-haptics/svelte';
 	import { defaultPatterns } from 'web-haptics';
@@ -259,8 +259,9 @@
 				: 'opacity-0'}"
 			style="width: 11.11%; height: 11.11%; left: {(selected?.col ?? 0) *
 				11.11}%; top: {(selected?.row ?? 0) * 11.11}%"
+			data-selection="true"
 		>
-			<div class="h-full w-full rounded-full bg-accent-foreground"></div>
+			<div class="h-full w-full"></div>
 		</div>
 		{#each rows as row (row)}
 			{#each cols as col (col)}
@@ -273,6 +274,11 @@
 					selected={selected?.row === row && selected?.col === col}
 					fade={fadeAnimations[row * 9 + col]}
 					grow={growAnimations[row * 9 + col]}
+					row_complete={!!rowsC[row]}
+					col_complete={!!colsC[col]}
+					box_complete={!!boxesC[CELL_BOX[row * 9 + col]]}
+					val_complete={(player.problem[row][col] || player.work.rows[row][col].val) !== 0 &&
+						counts[(player.problem[row][col] || player.work.rows[row][col].val) - 1] >= 9}
 				/>
 			{/each}
 		{/each}
@@ -298,7 +304,10 @@
 						}
 					}}
 					class="flex h-14 w-14 items-center justify-center"
-					class:opacity-25={counts[n - 1] >= 9}
+					class:opacity-25={n !== 0 && counts[n - 1] >= 9}
+					data-value={n}
+					data-val-complete={n !== 0 && counts[n - 1] >= 9}
+					data-selected={edit_number === n}
 				>
 					<span
 						class={`flex h-12 w-12 items-center justify-center rounded-full border border-secondary text-3xl ${edit_number === n ? 'bg-secondary text-secondary-foreground' : 'text-secondary'}`}

@@ -33,7 +33,7 @@
 	<div
 		class="safe-top safe-bottom safe-x flex h-dvh flex-col overflow-hidden bg-background font-sans text-foreground select-none"
 	>
-		<ThemePicker />
 		{@render children()}
+		<ThemePicker />
 	</div>
 {/if}
