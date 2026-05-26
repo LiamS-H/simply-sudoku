@@ -53,7 +53,7 @@
 </script>
 
 <button
-	class="relative z-10 flex items-center justify-center bg-transparent p-1 text-2xl font-semibold transition-colors
+	class="relative z-10 flex items-center justify-center bg-transparent text-2xl font-semibold transition-colors
 		{col === 0 ? 'border-l border-l-primary/20' : ''}
 		{row === 0 ? 'border-t border-t-primary/20' : ''}
 		{col % 3 === 2 && col !== 8 ? 'border-r-2 border-r-primary/50' : 'border-r border-r-primary/20'}
@@ -69,7 +69,7 @@
 	{/key}
 	{#if spanClass !== null}
 		{@const val = problemVal || workCell.val}
-		<div class="{spanClass} relative z-10">
+		<div class="{spanClass} relative z-10 m-1">
 			{#if val !== 0}
 				{#key grow.key}
 					<span
@@ -83,7 +83,7 @@
 		</div>
 	{:else}
 		<div
-			class="relative z-10 grid h-full w-full grid-cols-3 grid-rows-3 text-[8px] leading-tight text-foreground sm:text-xs"
+			class="relative z-10 grid h-full w-full grid-cols-3 grid-rows-3 text-[10px] leading-tight text-foreground sm:text-xs"
 		>
 			{#each [1, 2, 3, 4, 5, 6, 7, 8, 9] as n (n)}
 				<div class="flex items-center justify-center">
